@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 var bodyParser = require('body-parser');
+const userRoutes = require('./api/routes/user');
 require('dotenv').config()
 
 const mongoDbUri =
@@ -40,7 +41,7 @@ app.use((req, res, next) => {
 //Routes
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes)
-
+app.use('/user', userRoutes)
 
 //with these methods being below the routes, they wil catch all errors that arent successful
 app.use((req, res, next) => {
