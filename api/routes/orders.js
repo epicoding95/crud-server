@@ -7,27 +7,32 @@ const Product = require('../models/product')
 //if you are using a query such as find, findbyId, etc. then you have to call exec() to make it into a promise
 router.get('/', (req, res, next) => {
 
-    Order.find().select('_id product quantity').exec().then(docs => {
-        const id = req.body._id
-        res.status(200).json({
-            count: docs.length,
-            orders: docs.map(doc => {
-                return {
-                    _id: doc._id,
-                    product: doc.product,
-                    quantity: doc.quantity,
-                    request: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/orders/' + doc._id
-                    }
-                }
-            }),
 
+    //populate is used to handle reference properties  the first argument is the name of the collection and the 2nd is if you want to specify what properties from the collection to get
+    Order.find()
+        .select('_id product quantity')
+        .populate('product', 'name')
+        .exec().then(docs => {
+            const id = req.body._id
+            res.status(200).json({
+                count: docs.length,
+                orders: docs.map(doc => {
+                    return {
+                        _id: doc._id,
+                        product: doc.product,
+                        quantity: doc.quantity,
+                        request: {
+                            type: 'GET',
+                            url: 'http://localhost:3000/orders/' + doc._id
+                        }
+                    }
+                }),
+
+            })
+        }).catch(err => {
+            console.log(err)
+            res.status(500).json({ error: err })
         })
-    }).catch(err => {
-        console.log(err)
-        res.status(500).json({ error: err })
-    })
 })
 
 
@@ -70,7 +75,7 @@ router.post('/', (req, res, next) => {
 
 
 router.get('/:orderId', (req, res, next) => {
-    Order.findById(req.params.orderId).exec().then(order => {
+    Order.findById(req.params.orderId).populate('product').exec().then(order => {
         if (!order) {
             return res.status(404).json({
                 message: 'no order found'
