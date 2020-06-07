@@ -3,9 +3,10 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Order = require('../models/order');
 const Product = require('../models/product')
+const checkAuth = require('../middleware/check-auth');
 //if you add code after the initial response you need to RETURN the first response
 //if you are using a query such as find, findbyId, etc. then you have to call exec() to make it into a promise
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
 
 
     //populate is used to handle reference properties  the first argument is the name of the collection and the 2nd is if you want to specify what properties from the collection to get
@@ -37,7 +38,7 @@ router.get('/', (req, res, next) => {
 
 
 //generate a UUID like how we are below;
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
 
     Product.findById(req.body.productId).then(product => {
         if (!product) {
@@ -74,7 +75,7 @@ router.post('/', (req, res, next) => {
 })
 
 
-router.get('/:orderId', (req, res, next) => {
+router.get('/:orderId', checkAuth, (req, res, next) => {
     Order.findById(req.params.orderId).populate('product').exec().then(order => {
         if (!order) {
             return res.status(404).json({
@@ -93,7 +94,7 @@ router.get('/:orderId', (req, res, next) => {
     })
 })
 
-router.delete('/:orderId', (req, res, next) => {
+router.delete('/:orderId', checkAuth, (req, res, next) => {
 
     Order.deleteOne({ _id: req.params.orderId })
         .exec().then(result => {
